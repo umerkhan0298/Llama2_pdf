@@ -1,0 +1,12 @@
+pypdf
+langchain~=0.0.315
+torch
+accelerate
+bitsandbytes
+transformers
+sentence_transformers
+faiss_cpu
+chainlit~=0.7.2
+huggingface_hub
+openpyxl
+pandas~=2.1.1
