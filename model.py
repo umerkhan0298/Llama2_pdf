@@ -73,15 +73,27 @@ def final_result(query):
 
 
 qa_result = qa_bot()
-while True:
-    query = input("ask anything related to pdf\n")
-    print(qa_result)
-    if query == 'q':
-        break
-    # response = qa_result(query, return_only_outputs=True)
-    response = qa_result({'query': query})
-    print(response)
 
+# while True:
+#     query = input("ask anything related to pdf\n")
+#     print(qa_result)
+#     if query == 'q':
+#         break
+#     # response = qa_result(query, return_only_outputs=True)
+#     response = qa_result({'query': query})
+#     print(response)
+
+
+def update_new_info(query, db):
+
+    similar = db.similarity_search(query=query, k=2)
+    print("page_content:", similar[0].page_content)
+    df = store_to_df(db)
+    print(df['content'])
+    for i in range(len(df['content'])):
+        if similar[0].page_content in df['content'][i]:
+            print("got it", df['chunk_id'][i])
+            chunk_id = df['chunk_id'][i]
 
 # print(final_result("who are you"))
 # # chainlit code
@@ -114,3 +126,15 @@ while True:
 #     #     answer += "\nNo sources found"
 #
 #     await cl.Message(content=answer).send()
+
+def store_to_df(store):
+    v_dict = store.docstore._dict
+    data_rows = []
+    for k in v_dict.keys():
+        doc_name = v_dict[k].metadata['source'].split('/')[-1]
+        page_number = v_dict[k].metadata['page'] + 1
+        content = v_dict[k].page_content
+        data_rows.append({"chunk_id": k, "document": doc_name, "page": page_number, "content": content})
+    vector_df = pd.DataFrame(data_rows)
+    return vector_df
+
